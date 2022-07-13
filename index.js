@@ -12,7 +12,7 @@ const config = {
 
 const app = express();
 
-app.get('/vin/:vin', async (req, res) => {
+app.get('/vin/decode/:vin', async (req, res) => {
     const vin = req.params.vin;
     if (invalid(vin)) {
         res.send('VIN is invalid!');

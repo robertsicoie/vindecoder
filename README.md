@@ -13,4 +13,4 @@ The simplest way to run this script
 `API_KEY=yourKey SECRET_KEY=yourSecret PORT=5000 node index.js`. If omitted, default port is 3000.
 
 To check a vin number call the `/decode/<yourVIN>` endpoint. For example:
-`curl --location --request GET 'http://localhost:3000/vin/WVGZZZ5NZJM131395'`
+```curl --location --request GET 'http://localhost:5000/vin/decode/WVGZZZ5NZJM131395'```
