@@ -51,3 +51,5 @@ function invalid(vin) {
         || vin.includes('O') 
         || vin.includes('Q');
 }
+
+export default app;
