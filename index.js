@@ -1,18 +1,17 @@
-import express from 'express';
-import { got } from 'got';
-import crypto from 'crypto';
+const functions = require('@google-cloud/functions-framework');
+const escapeHtml = require('escape-html');
+const crypto = require('crypto');
+const got = require('got');
 
 const config = {
     API_KEY: process.env.API_KEY,
     SECRET_KEY: process.env.SECRET_KEY,
-    PORT: process.env.PORT ?? 3000,
     CONNECT_TIMEOUT: process.env.CONNECT_TIMEOUT ?? 5000,
     READ_TIMEOUT: process.env.READ_TIMEOUT ?? 5000
 };
 
-const app = express();
 
-app.get('/vin/decode/:vin', async (req, res) => {
+functions.http('/vin/decode/:vin', async (req, res) => {
     const vin = req.params.vin;
     if (invalid(vin)) {
         res.send('VIN is invalid!');
@@ -32,10 +31,6 @@ app.get('/vin/decode/:vin', async (req, res) => {
         console.log('Error: ', error);
         throw new Error('Failed to decode VIN: ', error);
     }
-});
-
-app.listen(config.PORT, () => {
-    console.log(`VIN service listening on port ${config.PORT}`);
 });
 
 function checksum(vin, action) {

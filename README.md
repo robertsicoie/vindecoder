@@ -9,8 +9,7 @@ To use this script you first need your own API key and secret key from [vindecod
 Clone this repository and then build it with `npm install`
 
 ### Run
-The simplest way to run this script
-`API_KEY=yourKey SECRET_KEY=yourSecret PORT=5000 node index.js`. If omitted, default port is 3000.
+TODO This runs on GCP Functions
 
 To check a vin number call the `/decode/<yourVIN>` endpoint. For example:
 ```curl --location --request GET 'http://localhost:5000/vin/decode/WVGZZZ5NZJM131395'```
