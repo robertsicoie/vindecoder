@@ -7,12 +7,18 @@ const config = {
     SECRET_KEY: process.env.SECRET_KEY,
     PORT: process.env.PORT ?? 3000,
     CONNECT_TIMEOUT: process.env.CONNECT_TIMEOUT ?? 5000,
-    READ_TIMEOUT: process.env.READ_TIMEOUT ?? 5000
+    READ_TIMEOUT: process.env.READ_TIMEOUT ?? 5000,
+    JWT: process.env.JWT
 };
 
 const app = express();
 
 app.get('/vin/decode/:vin', async (req, res) => {
+    if (!isAuthorized(req)) {
+        logRequest('Unauthorized request!', req);
+        res.sendStatus(401);
+        return;
+    };
     const vin = req.params.vin;
     if (invalid(vin)) {
         res.send('VIN is invalid!');
@@ -27,7 +33,7 @@ app.get('/vin/decode/:vin', async (req, res) => {
                 read: config.READ_TIMEOUT
             }
         });
-        res.send(JSON.parse(response.body));
+        res.send(toCar(JSON.parse(response.body)));
     } catch(error) {
         console.log('Error: ', error);
         throw new Error('Failed to decode VIN: ', error);
@@ -52,4 +58,36 @@ function invalid(vin) {
         || vin.includes('Q');
 }
 
-export default app;
+function toCar(json) {
+    var car = {};
+    json.decode.forEach(element => {
+        car[element['label'].replace(/ +/g,'_').toLowerCase()] = element['value'];
+    });
+    return car;
+}
+
+function isAuthorized(req) {
+    // TODO proper validation with auth server
+    if (config.JWT != null) {
+        return `Bearer ${config.JWT}` === req.headers['authorization'];
+    }
+    return true;
+}
+
+function logRequest(message, request) {
+    const { rawHeaders, httpVersion, method, socket, url } = request;
+    const { remoteAddress, remoteFamily } = socket;
+
+    console.log(message,
+        JSON.stringify({
+          timestamp: Date.now(),
+          rawHeaders,
+          httpVersion,
+          method,
+          remoteAddress,
+          remoteFamily,
+          url
+        })
+      );
+
+}
