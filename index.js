@@ -1,6 +1,7 @@
 import express from 'express';
 import { got } from 'got';
 import crypto from 'crypto';
+import FSStorage from './storage.js';
 
 const config = {
     API_KEY: process.env.API_KEY,
@@ -8,10 +9,13 @@ const config = {
     PORT: process.env.PORT ?? 3000,
     CONNECT_TIMEOUT: process.env.CONNECT_TIMEOUT ?? 5000,
     READ_TIMEOUT: process.env.READ_TIMEOUT ?? 5000,
-    JWT: process.env.JWT
+    JWT: process.env.JWT,
+    STORAGE_PATH: '/tmp'
 };
 
 const app = express();
+
+const storage = new FSStorage(config.STORAGE_PATH);
 
 app.get('/vin/decode/:vin', async (req, res) => {
     if (!isAuthorized(req)) {
@@ -25,19 +29,28 @@ app.get('/vin/decode/:vin', async (req, res) => {
         return;
     }
 
-    var controlSum = checksum(vin, 'decode');
+    var responseBody= {};
     try {
-        const response = await got.get(`https://api.vindecoder.eu/3.1/${config.API_KEY}/${controlSum}/decode/${vin}.json`, {
-            timeout: {
-                connect: config.CONNECT_TIMEOUT,
-                read: config.READ_TIMEOUT
-            }
-        });
-        res.send(toCar(JSON.parse(response.body)));
-    } catch(error) {
-        console.log('Error: ', error);
-        throw new Error('Failed to decode VIN: ', error);
+        responseBody = storage.responseFromStorage(vin);
+        console.log(`Found ${vin} in storage.`);
+    } catch (error) {
+        console.log(`VIN ${vin} not found, calling API...`);
+        var controlSum = checksum(vin, 'decode');
+        try {
+            const response = await got.get(`https://api.vindecoder.eu/3.1/${config.API_KEY}/${controlSum}/decode/${vin}.json`, {
+                timeout: {
+                    connect: config.CONNECT_TIMEOUT,
+                    read: config.READ_TIMEOUT
+                }
+            });
+            responseBody = JSON.parse(response.body);
+            storage.responseToStorage(vin, response.body);
+        } catch(error) {
+            console.log('Error: ', error);
+            throw new Error('Failed to decode VIN: ', error);
+        }
     }
+    res.send(toCar(responseBody));
 });
 
 app.listen(config.PORT, () => {
@@ -80,14 +93,13 @@ function logRequest(message, request) {
 
     console.log(message,
         JSON.stringify({
-          timestamp: Date.now(),
-          rawHeaders,
-          httpVersion,
-          method,
-          remoteAddress,
-          remoteFamily,
-          url
+            timestamp: Date.now(),
+            rawHeaders,
+            httpVersion,
+            method,
+            remoteAddress,
+            remoteFamily,
+            url
         })
-      );
-
+    );
 }
