@@ -1,0 +1,6 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'europe-central2-docker.pkg.dev/pinkparts/pinkparts/vindecoder', '.']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'europe-central2-docker.pkg.dev/pinkparts/pinkparts/vindecoder']
+images: ['europe-central2-docker.pkg.dev/pinkparts/pinkparts/vindecoder']
