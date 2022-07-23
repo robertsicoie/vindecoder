@@ -1,5 +1,6 @@
 import express from 'express';
 import { got } from 'got';
+import cors from 'cors';
 import crypto from 'crypto';
 import FSStorage from './storage.js';
 
@@ -13,9 +14,10 @@ const config = {
     STORAGE_PATH: '/tmp'
 };
 
-const app = express();
-
 const storage = new FSStorage(config.STORAGE_PATH);
+
+const app = express();
+app.use(cors({'origin': '*'}));
 
 app.get('/vin/decode/:vin', async (req, res) => {
     if (!isAuthorized(req)) {
