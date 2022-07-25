@@ -76,7 +76,7 @@ function invalid(vin) {
 function toCar(json) {
     var car = {};
     json.decode.forEach(element => {
-        car[element['label'].replace(/ +/g,'_').toLowerCase()] = element['value'];
+        car[element['label']] = element['value'];
     });
     return car;
 }
