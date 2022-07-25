@@ -1,0 +1,13 @@
+# runtime: nodejs
+# env: flex
+
+runtime: nodejs16
+instance_class: F2
+
+service: vindecoder
+
+env_variables:
+  API_KEY: 89c880c82f8f
+  SECRET_KEY: ad3461c19f
+  JWT: AUTHORIZED
+  
